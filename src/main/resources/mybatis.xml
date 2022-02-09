@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+        <package name="cc.w0rm.douban.db"/>
+    </typeAliases>
+
+    <environments default="dev">
+        <!--开发环境配置-->
+        <environment id="dev">
+            <!--事务管理器采用JDBC方式-->
+            <transactionManager type="JDBC"></transactionManager>
+            <!--利用Mybatis自带连接池管理连接
+            <dataSource type="POOLED">-->
+            <!--MyBatis与Druid的整合-->
+            <dataSource type="cc.w0rm.douban.db.DruidPool">
+                <!--JDBC连接属性（Druid连接池drive的name不同）-->
+                <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/trick?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;allowPublicKeyRetrieval=true"/>
+                <property name="username" value="root"/>
+                <property name="password" value="xuyang1001"/>
+                <!--连接池初始连接数-->
+                <property name="initialSize" value="10"/>
+                <!--连接池最大连接数-->
+                <property name="maxActive" value="20"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+
+    <mappers>
+       <mapper resource="mybatis/mapper/DoubanMapper.xml"/>
+        <mapper resource="mybatis/mapper/TagMapper.xml"/>
+    </mappers>
+</configuration>
