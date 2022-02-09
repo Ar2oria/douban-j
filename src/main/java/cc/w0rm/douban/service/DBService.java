@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author xuyang
@@ -65,8 +66,14 @@ public class DBService {
         tagExample.createCriteria()
                 .andTextIn(tagList);
         List<Tag> tags = tagMapper.selectByExample(tagExample);
+        if (Objects.isNull(tags)) {
+            return Collections.emptyList();
+        }
+        List<Long> doubanIdList = tags.stream()
+                .map(Tag::getDoubanId)
+                .collect(Collectors.toList());
 
-        return null;
+        return selectDoubanByIdList(doubanIdList);
     }
 
 
