@@ -1,11 +1,9 @@
 package cc.w0rm.douban.db;
 
-import lombok.ToString;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-@ToString
+
 public class Douban {
     private Long id;
 
@@ -20,6 +18,10 @@ public class Douban {
     private Date pubTime;
 
     private Date createAt;
+
+    private Long webId;
+
+    private String content;
 
     public Long getId() {
         return id;
@@ -77,6 +79,22 @@ public class Douban {
         this.createAt = createAt;
     }
 
+    public Long getWebId() {
+        return webId;
+    }
+
+    public void setWebId(Long webId) {
+        this.webId = webId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content == null ? null : content.trim();
+    }
+
     public static Douban.Builder builder() {
         return new Douban.Builder();
     }
@@ -123,6 +141,16 @@ public class Douban {
             return this;
         }
 
+        public Builder webId(Long webId) {
+            obj.setWebId(webId);
+            return this;
+        }
+
+        public Builder content(String content) {
+            obj.setContent(content);
+            return this;
+        }
+
         public Douban build() {
             return this.obj;
         }
@@ -135,7 +163,9 @@ public class Douban {
         author("author", "author", "VARCHAR", false),
         authorUrl("author_url", "authorUrl", "VARCHAR", false),
         pubTime("pub_time", "pubTime", "TIMESTAMP", false),
-        createAt("create_at", "createAt", "TIMESTAMP", false);
+        createAt("create_at", "createAt", "TIMESTAMP", false),
+        webId("web_id", "webId", "BIGINT", false),
+        content("content", "content", "VARCHAR", false);
 
         private static final String BEGINNING_DELIMITER = "\"";
 

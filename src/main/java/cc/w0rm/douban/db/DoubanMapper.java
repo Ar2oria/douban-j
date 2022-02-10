@@ -1,9 +1,10 @@
 package cc.w0rm.douban.db;
 
+import cc.w0rm.douban.db.Douban;
+import cc.w0rm.douban.db.DoubanExample;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
-
-import java.util.List;
 
 public interface DoubanMapper {
     long countByExample(DoubanExample example);

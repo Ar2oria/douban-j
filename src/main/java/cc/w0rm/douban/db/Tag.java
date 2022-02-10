@@ -1,11 +1,9 @@
 package cc.w0rm.douban.db;
 
-import lombok.ToString;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-@ToString
+
 public class Tag {
     private Long id;
 
@@ -14,6 +12,8 @@ public class Tag {
     private String text;
 
     private Date createAt;
+
+    private String nature;
 
     public Long getId() {
         return id;
@@ -47,6 +47,14 @@ public class Tag {
         this.createAt = createAt;
     }
 
+    public String getNature() {
+        return nature;
+    }
+
+    public void setNature(String nature) {
+        this.nature = nature == null ? null : nature.trim();
+    }
+
     public static Tag.Builder builder() {
         return new Tag.Builder();
     }
@@ -78,6 +86,11 @@ public class Tag {
             return this;
         }
 
+        public Builder nature(String nature) {
+            obj.setNature(nature);
+            return this;
+        }
+
         public Tag build() {
             return this.obj;
         }
@@ -87,7 +100,8 @@ public class Tag {
         id("id", "id", "BIGINT", false),
         doubanId("douban_id", "doubanId", "BIGINT", false),
         text("text", "text", "VARCHAR", false),
-        createAt("create_at", "createAt", "TIMESTAMP", false);
+        createAt("create_at", "createAt", "TIMESTAMP", false),
+        nature("nature", "nature", "VARCHAR", false);
 
         private static final String BEGINNING_DELIMITER = "\"";
 

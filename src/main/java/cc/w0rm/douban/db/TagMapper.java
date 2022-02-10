@@ -1,9 +1,10 @@
 package cc.w0rm.douban.db;
 
+import cc.w0rm.douban.db.Tag;
+import cc.w0rm.douban.db.TagExample;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
-
-import java.util.List;
 
 public interface TagMapper {
     long countByExample(TagExample example);

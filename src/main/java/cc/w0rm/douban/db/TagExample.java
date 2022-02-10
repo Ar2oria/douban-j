@@ -551,6 +551,106 @@ public class TagExample {
             addCriterion("create_at not between", value1, value2, "createAt");
             return (Criteria) this;
         }
+
+        public Criteria andNatureIsNull() {
+            addCriterion("nature is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureIsNotNull() {
+            addCriterion("nature is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureEqualTo(String value) {
+            addCriterion("nature =", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("nature = ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureNotEqualTo(String value) {
+            addCriterion("nature <>", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureNotEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("nature <> ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureGreaterThan(String value) {
+            addCriterion("nature >", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureGreaterThanColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("nature > ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureGreaterThanOrEqualTo(String value) {
+            addCriterion("nature >=", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureGreaterThanOrEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("nature >= ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureLessThan(String value) {
+            addCriterion("nature <", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureLessThanColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("nature < ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureLessThanOrEqualTo(String value) {
+            addCriterion("nature <=", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureLessThanOrEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("nature <= ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureLike(String value) {
+            addCriterion("nature like", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureNotLike(String value) {
+            addCriterion("nature not like", value, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureIn(List<String> values) {
+            addCriterion("nature in", values, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureNotIn(List<String> values) {
+            addCriterion("nature not in", values, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureBetween(String value1, String value2) {
+            addCriterion("nature between", value1, value2, "nature");
+            return (Criteria) this;
+        }
+
+        public Criteria andNatureNotBetween(String value1, String value2) {
+            addCriterion("nature not between", value1, value2, "nature");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

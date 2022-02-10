@@ -6,6 +6,7 @@
     <result column="douban_id" jdbcType="BIGINT" property="doubanId" />
     <result column="text" jdbcType="VARCHAR" property="text" />
     <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
+    <result column="nature" jdbcType="VARCHAR" property="nature" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -66,7 +67,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, douban_id, text, create_at
+    id, douban_id, text, create_at, nature
   </sql>
   <select id="selectByExample" parameterType="cc.w0rm.douban.db.TagExample" resultMap="BaseResultMap">
     select
@@ -107,10 +108,10 @@
     </if>
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cc.w0rm.douban.db.Tag" useGeneratedKeys="true">
-    insert into tag (douban_id, text, create_at
-      )
-    values (#{doubanId,jdbcType=BIGINT}, #{text,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}
-      )
+    insert into tag (douban_id, text, create_at, 
+      nature)
+    values (#{doubanId,jdbcType=BIGINT}, #{text,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, 
+      #{nature,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cc.w0rm.douban.db.Tag" useGeneratedKeys="true">
     insert into tag
@@ -124,6 +125,9 @@
       <if test="createAt != null">
         create_at,
       </if>
+      <if test="nature != null">
+        nature,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="doubanId != null">
@@ -134,6 +138,9 @@
       </if>
       <if test="createAt != null">
         #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="nature != null">
+        #{nature,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -158,6 +165,9 @@
       <if test="record.createAt != null">
         create_at = #{record.createAt,jdbcType=TIMESTAMP},
       </if>
+      <if test="record.nature != null">
+        nature = #{record.nature,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -168,7 +178,8 @@
     set id = #{record.id,jdbcType=BIGINT},
       douban_id = #{record.doubanId,jdbcType=BIGINT},
       text = #{record.text,jdbcType=VARCHAR},
-      create_at = #{record.createAt,jdbcType=TIMESTAMP}
+      create_at = #{record.createAt,jdbcType=TIMESTAMP},
+      nature = #{record.nature,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -185,6 +196,9 @@
       <if test="createAt != null">
         create_at = #{createAt,jdbcType=TIMESTAMP},
       </if>
+      <if test="nature != null">
+        nature = #{nature,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -192,7 +206,8 @@
     update tag
     set douban_id = #{doubanId,jdbcType=BIGINT},
       text = #{text,jdbcType=VARCHAR},
-      create_at = #{createAt,jdbcType=TIMESTAMP}
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      nature = #{nature,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectByExampleWithRowbounds" parameterType="cc.w0rm.douban.db.TagExample" resultMap="BaseResultMap">
@@ -211,11 +226,11 @@
   </select>
   <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
     insert into tag
-    (douban_id, text, create_at)
+    (douban_id, text, create_at, nature)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.doubanId,jdbcType=BIGINT}, #{item.text,jdbcType=VARCHAR}, #{item.createAt,jdbcType=TIMESTAMP}
-        )
+      (#{item.doubanId,jdbcType=BIGINT}, #{item.text,jdbcType=VARCHAR}, #{item.createAt,jdbcType=TIMESTAMP}, 
+        #{item.nature,jdbcType=VARCHAR})
     </foreach>
   </insert>
   <insert id="batchInsertSelective" keyColumn="id" keyProperty="list.id" parameterType="map" useGeneratedKeys="true">
@@ -236,6 +251,9 @@
         </if>
         <if test="'create_at'.toString() == column.value">
           #{item.createAt,jdbcType=TIMESTAMP}
+        </if>
+        <if test="'nature'.toString() == column.value">
+          #{item.nature,jdbcType=VARCHAR}
         </if>
       </foreach>
       )

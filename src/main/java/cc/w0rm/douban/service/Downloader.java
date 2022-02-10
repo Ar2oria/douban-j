@@ -1,27 +1,18 @@
 package cc.w0rm.douban.service;
 
 import cc.w0rm.douban.model.*;
+import cc.w0rm.douban.util.CollUtil;
 import cc.w0rm.douban.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.jsonldjava.utils.JsonUtils;
+import lombok.Getter;
+import lombok.Setter;
 import okhttp3.*;
-import org.ansj.domain.Result;
-import org.ansj.domain.Term;
-import org.ansj.library.AmbiguityLibrary;
-import org.ansj.library.DicLibrary;
-import org.ansj.splitWord.analysis.DicAnalysis;
-import org.ansj.splitWord.analysis.NlpAnalysis;
-import org.ansj.splitWord.analysis.ToAnalysis;
-import org.ansj.util.MyStaticValue;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -30,8 +21,16 @@ import java.util.stream.Collectors;
  */
 public class Downloader {
 
+    private static final int MAX_THREAD_NUM = 1;
+    private static final int MAX_TIME_OUT = 3;
+    private static final int INTERVAL = 1000;
+
 
     static class DoubanSearchClient {
+
+        @Getter
+        @Setter
+        private String cooike = "";
 
         private static final OkHttpClient OK_HTTP_CLIENT = buildClient();
 
@@ -78,6 +77,8 @@ public class Downloader {
             try {
                 Request req = new Request.Builder()
                         .url(url)
+                        .addHeader("Cookie", cooike)
+                        .addHeader("Host", "www.douban.com")
                         .addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36")
                         .build();
                 Call call = OK_HTTP_CLIENT.newCall(req);
@@ -93,44 +94,181 @@ public class Downloader {
         }
     }
 
-    public static void main(String[] args) {
-        DoubanSearchClient doubanSearchClient = new DoubanSearchClient();
+    static class StatisticsWindow {
+        private static final int WINDOW_SIZE = 20;
+        private static final int MIN_REPEAT_NUM = 20;
+        private static final int REPEAT_RATIO = 90;
 
-        DoubanListRequestBO requestBO = new DoubanListRequestBO();
-        requestBO.setKey("望京");
+        private Queue<Boolean> queue = new ArrayDeque<>();
+        private int repeat = 0;
 
-        DoubanListResponseDTO responseDTO = doubanSearchClient.getDoubanList(requestBO);
-        System.out.println(responseDTO);
+        public void repeatAndIncrement() {
+            if (queue.size() == WINDOW_SIZE) {
+                boolean poll = queue.poll();
+                if (!poll) {
+                    repeat--;
+                }
+            }
+            queue.offer(true);
+            repeat++;
+        }
 
-        String doubanHtml = doubanSearchClient.getDoubanHtml(responseDTO.getDataList().get(0).getUrl());
-        System.out.println(doubanHtml);
+        public void increment() {
+            if (queue.size() == WINDOW_SIZE) {
+                boolean poll = queue.poll();
+                if (poll) {
+                    repeat--;
+                }
+            }
+            queue.offer(false);
+        }
 
-        Pattern pattern = Pattern.compile("<script type=\"application/ld[+]json\">([\\s\\S]*?)</script>");
-        Matcher matcher = pattern.matcher(doubanHtml);
-        if (!matcher.find()){
+        public boolean overflow() {
+            if (queue.size() < MIN_REPEAT_NUM) {
+                return false;
+            }
+            if (repeat * 100 / queue.size() > REPEAT_RATIO) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    static class DownloaderAction implements ProducerAction {
+        private volatile boolean status = false;
+
+
+        @Override
+        public boolean finished() {
+            return status;
+        }
+
+        @Override
+        public void setFinish() {
+            status = true;
+        }
+    }
+
+    public static Pipe<DoubanAnalyseModel> search(String place, String cookie, FilterMask<DoubanListResponseDTO.ItemDTO> filterMask) {
+        ProducerAction action = new DownloaderAction();
+        Pipe<DoubanAnalyseModel> pipe = new Pipe<>(action);
+        StatisticsWindow window = new StatisticsWindow();
+
+        new Thread(() -> {
+            DoubanSearchClient doubanSearchClient = new DoubanSearchClient();
+            doubanSearchClient.setCooike(cookie);
+
+            long total = -1L;
+            long maxTotal = 0L;
+
+            DoubanListRequestBO requestBO = new DoubanListRequestBO();
+            requestBO.setKey(place);
+
+            while (total < maxTotal) {
+                try {
+                    DoubanListResponseDTO responseDTO = doubanSearchClient.getDoubanList(requestBO);
+                    List<DoubanListResponseDTO.ItemDTO> dataList = responseDTO.getDataList();
+                    if (CollUtil.isEmpty(dataList)) {
+                        break;
+                    }
+                    List<DoubanListResponseDTO.ItemDTO> newDataList = filter(dataList, window, filterMask);
+                    if (CollUtil.isEmpty(newDataList)) {
+                        break;
+                    }
+
+                    getDetail(doubanSearchClient, newDataList, pipe);
+
+                    PageInfoDTO pageInfo = responseDTO.getPageInfo();
+                    maxTotal = pageInfo.getTotal();
+                    total += dataList.size();
+
+                    requestBO.setPage(requestBO.getPage() + 1);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    total = Math.max(total, 0L);
+                }
+            }
+            action.setFinish();
+        }).start();
+
+        return pipe;
+    }
+
+    private static List<DoubanListResponseDTO.ItemDTO> filter(List<DoubanListResponseDTO.ItemDTO> dataList,
+                                                              StatisticsWindow window,
+                                                              FilterMask<DoubanListResponseDTO.ItemDTO> filterMask) {
+        if (CollUtil.isEmpty(dataList)) {
+            return dataList;
+        }
+
+        List<DoubanListResponseDTO.ItemDTO> newDataList = dataList.stream()
+                .filter(data -> "豆瓣".equals(data.getSourceName()))
+                .collect(Collectors.toList());
+
+        List<DoubanListResponseDTO.ItemDTO> result = new ArrayList<>(dataList.size());
+
+        Map<DoubanListResponseDTO.ItemDTO, Boolean> filterResult = filterMask.filter(newDataList);
+        for (DoubanListResponseDTO.ItemDTO itemDTO : filterResult.keySet()) {
+            boolean repeat = filterResult.getOrDefault(itemDTO, false);
+            if (repeat) {
+                window.repeatAndIncrement();
+            } else {
+                result.add(itemDTO);
+                window.increment();
+            }
+            if (window.overflow()) {
+                return Collections.emptyList();
+            }
+        }
+
+        return result;
+    }
+
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(MAX_THREAD_NUM,
+            MAX_THREAD_NUM, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(500));
+
+    private static void getDetail(DoubanSearchClient doubanSearchClient, List<DoubanListResponseDTO.ItemDTO> dataList, Pipe<DoubanAnalyseModel> pipe) {
+        if (CollUtil.isEmpty(dataList) || Objects.isNull(pipe)) {
             return;
         }
 
-        String s = matcher.group(1).replaceAll("\\s+", "");
-        Map o = (Map) JsonUtil.toObject(s, Object.class);
-        String text = o.get("text").toString();
-        System.out.println(text);
+        final AtomicInteger interval = new AtomicInteger(INTERVAL);
+        CompletableFuture[] completableFutures = dataList.stream()
+                .map(item -> CompletableFuture.supplyAsync(() -> {
+                    String doubanHtml = StringUtils.EMPTY;
+                    try {
 
+                        doubanHtml = doubanSearchClient.getDoubanHtml(item.getUrl());
 
+                        int intevalInt = interval.get();
+                        Thread.sleep(intevalInt);
 
-        Result parse = ToAnalysis.parse(text);
-        List<Term> ll = parse.getTerms().stream()
-                .filter(term -> term.getNatureStr().contains("n"))
-                .collect(Collectors.toList());
+                        intevalInt /= 2;
+                        intevalInt = Math.max(intevalInt, INTERVAL);
+                        interval.set(intevalInt);
 
-        System.out.println(ll);
+                    } catch (Exception e) {
+                        interval.set(interval.get() * 2);
+                        e.printStackTrace();
+                    }
+                    return Pair.of(item, doubanHtml);
+                }, EXECUTOR_SERVICE).whenComplete((r, e) -> {
+                    if (Objects.nonNull(e)) {
+                        return;
+                    }
+                    DoubanAnalyseModel model = new DoubanAnalyseModel();
+                    model.setItem(r.getKey());
+                    model.setHtml(r.getRight());
+                    pipe.putTask(model);
+                })).collect(Collectors.toList()).toArray(new CompletableFuture[dataList.size()]);
 
-    }
+        CompletableFuture<Void> oneFuture = CompletableFuture.allOf(completableFutures);
 
-
-    public static Pipe search(String place, FilterMask filterMask) {
-
-
-        return null;
+        try {
+            oneFuture.get((long) MAX_TIME_OUT * dataList.size(), TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
