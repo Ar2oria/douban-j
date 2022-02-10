@@ -21,7 +21,7 @@ public class DoubanEngine {
     public static void run(String place, List<String> tagList, int day, String cookie) {
         preProcessTagList(tagList);
         DBService service = new DBService();
-        Pipe<DoubanAnalyseModel> pipeWebResource = Downloader.search(place, cookie, service.getFilter());
+        Pipe<DoubanAnalyseModel> pipeWebResource = Downloader.search(place, cookie, day, service.getFilter());
         Pipe<DoubanAnalyseModel> pipeText = TextProcessor.process(pipeWebResource);
         service.save(pipeText);
         search(service, pipeText, place, tagList, day);
@@ -165,5 +165,13 @@ public class DoubanEngine {
                 e.printStackTrace();
             }
         }
+
+        try {
+            Thread.sleep(2000L);
+            System.out.println("=== 数据搜索完成 ===");
+        } catch (Exception e) {
+            //do nothing
+        }
+
     }
 }

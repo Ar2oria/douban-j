@@ -2,6 +2,7 @@ package cc.w0rm.douban.service;
 
 import cc.w0rm.douban.model.*;
 import cc.w0rm.douban.util.CollUtil;
+import cc.w0rm.douban.util.DateUtil;
 import cc.w0rm.douban.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,10 +95,9 @@ public class Downloader {
     }
 
     static class StatisticsWindow {
-        private static final int WINDOW_SIZE = 20;
-        private static final int MIN_REPEAT_NUM = 30;
-        private static final int MIN_REPEAT_PAGE = 3;
-        private static final int REPEAT_RATIO = 98;
+        private static final int WINDOW_SIZE = 50;
+        private static final int MIN_REPEAT_NUM = 100;
+        private static final int REPEAT_RATIO = 95;
 
 
         private Queue<Boolean> queue = new ArrayDeque<>();
@@ -106,10 +107,9 @@ public class Downloader {
         public void repeatAndIncrement() {
             if (queue.size() == WINDOW_SIZE) {
                 boolean poll = queue.poll();
-                if (!poll) {
+                if (poll) {
                     repeat--;
                 }
-                repeat--;
             }
             queue.offer(true);
             repeat++;
@@ -128,7 +128,7 @@ public class Downloader {
         }
 
         public boolean overflow() {
-            if (total < MIN_REPEAT_NUM * MIN_REPEAT_PAGE) {
+            if (total < MIN_REPEAT_NUM) {
                 return false;
             }
             if (repeat * 100 / queue.size() > REPEAT_RATIO) {
@@ -153,7 +153,7 @@ public class Downloader {
         }
     }
 
-    public static Pipe<DoubanAnalyseModel> search(String place, String cookie, FilterMask<DoubanListResponseDTO.ItemDTO> filterMask) {
+    public static Pipe<DoubanAnalyseModel> search(String place, String cookie, int day, FilterMask<DoubanListResponseDTO.ItemDTO> filterMask) {
         ProducerAction action = new DownloaderAction();
         Pipe<DoubanAnalyseModel> pipe = new Pipe<>(action);
         StatisticsWindow window = new StatisticsWindow();
@@ -180,7 +180,7 @@ public class Downloader {
 
                     List<DoubanListResponseDTO.ItemDTO> newDataList = null;
                     try {
-                        newDataList = filter(dataList, window, filterMask);
+                        newDataList = filter(dataList, day, window, filterMask);
                     } catch (Exception e) {
                         e.printStackTrace();
                         break;
@@ -208,11 +208,14 @@ public class Downloader {
     }
 
     private static List<DoubanListResponseDTO.ItemDTO> filter(List<DoubanListResponseDTO.ItemDTO> dataList,
+                                                              int day,
                                                               StatisticsWindow window,
                                                               FilterMask<DoubanListResponseDTO.ItemDTO> filterMask) {
         if (CollUtil.isEmpty(dataList)) {
             return dataList;
         }
+
+        long now = Instant.now().toEpochMilli();
 
         List<DoubanListResponseDTO.ItemDTO> newDataList = dataList.stream()
                 .filter(data -> "豆瓣".equals(data.getSourceName()))
@@ -222,8 +225,9 @@ public class Downloader {
 
         Map<DoubanListResponseDTO.ItemDTO, Boolean> filterResult = filterMask.filter(newDataList);
         for (DoubanListResponseDTO.ItemDTO itemDTO : filterResult.keySet()) {
+            boolean old = DateUtil.msToDays(now - itemDTO.getPubTime().getTime()) > day;
             boolean repeat = filterResult.getOrDefault(itemDTO, false);
-            if (repeat) {
+            if (old || repeat) {
                 window.repeatAndIncrement();
             } else {
                 result.add(itemDTO);
