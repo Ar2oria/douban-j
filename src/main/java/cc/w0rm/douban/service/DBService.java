@@ -67,18 +67,39 @@ public class DBService {
 
         DoubanListResponseDTO.ItemDTO item = task.getItem();
 
+        long webId = getWebId(item.getUrl());
+
         Douban douban = new Douban();
         douban.setTitle(item.getTitle());
         douban.setAuthor(item.getAuthor());
         douban.setAuthorUrl(item.getAuthorUrl());
         douban.setUrl(item.getUrl());
         douban.setPubTime(item.getPubTime());
-        douban.setWebId(getWebId(item.getUrl()));
+        douban.setWebId(webId);
         douban.setContent(task.getHtmlContent());
-        doubanMapper.insert(douban);
+
+        Douban oldDouban = selectDoubanByWebId(webId);
+        if (Objects.nonNull(oldDouban)) {
+            if (StringUtils.isBlank(task.getHtmlContent())) {
+                return oldDouban.getId();
+            }
+            douban.setId(oldDouban.getId());
+            doubanMapper.updateByPrimaryKeySelective(douban);
+        } else {
+            doubanMapper.insert(douban);
+        }
 
         if (CollUtil.isEmpty(task.getTagMap())) {
             return douban.getId();
+        }
+
+        if (StringUtils.isBlank(task.getHtmlContent())) {
+            return douban.getId();
+        } else {
+            TagExample example = new TagExample();
+            example.createCriteria()
+                    .andDoubanIdEqualTo(douban.getId());
+            tagMapper.deleteByExample(example);
         }
 
         List<Tag> tagEntityList = task.getTagMap().keySet().stream()
@@ -156,6 +177,7 @@ public class DBService {
 
             List<Douban> doubanList = dbService.selectDoubanByWebIdList(new ArrayList<>(webIds));
             Set<Long> existWebIds = doubanList.stream()
+                    .filter(douban -> StringUtils.isNotBlank(douban.getContent()))
                     .map(Douban::getWebId)
                     .collect(Collectors.toSet());
 
