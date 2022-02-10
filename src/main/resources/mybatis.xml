@@ -17,8 +17,9 @@
             <!--MyBatis与Druid的整合-->
             <dataSource type="cc.w0rm.douban.db.DruidPool">
                 <!--JDBC连接属性（Druid连接池drive的name不同）-->
-                <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://127.0.0.1:3306/trick?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;allowPublicKeyRetrieval=true"/>
+                <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url"
+                          value="jdbc:mysql://127.0.0.1:3306/trick?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;allowPublicKeyRetrieval=true"/>
                 <property name="username" value="root"/>
                 <property name="password" value="xuyang1001"/>
                 <!--连接池初始连接数-->
@@ -31,7 +32,7 @@
 
 
     <mappers>
-       <mapper resource="mybatis/mapper/DoubanMapper.xml"/>
+        <mapper resource="mybatis/mapper/DoubanMapper.xml"/>
         <mapper resource="mybatis/mapper/TagMapper.xml"/>
     </mappers>
 </configuration>

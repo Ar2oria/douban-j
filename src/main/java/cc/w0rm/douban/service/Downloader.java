@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 public class Downloader {
 
     private static final int MAX_THREAD_NUM = 1;
-    private static final int MAX_TIME_OUT = 3;
-    private static final int INTERVAL = 1000;
+    private static final int INTERVAL = 5000;
+    private static final int MAX_TIME_OUT = 5500;
 
 
     static class DoubanSearchClient {
@@ -49,9 +49,7 @@ public class Downloader {
             try {
                 Request req = new Request.Builder()
                         .url(requestBO.getUrl())
-                        .addHeader("Content-Type", "application/json")
                         .addHeader("Host", "uz.yurixu.com")
-                        .addHeader("Referer", "http://uz.yurixu.com/manage/beijing.php")
                         .addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36")
                         .build();
                 Call call = OK_HTTP_CLIENT.newCall(req);
@@ -98,11 +96,12 @@ public class Downloader {
         private static final int WINDOW_SIZE = 20;
         private static final int MIN_REPEAT_NUM = 30;
         private static final int MIN_REPEAT_PAGE = 3;
-        private static final int REPEAT_RATIO = 90;
+        private static final int REPEAT_RATIO = 98;
 
 
         private Queue<Boolean> queue = new ArrayDeque<>();
         private int repeat = 0;
+        private long total = 0;
 
         public void repeatAndIncrement() {
             if (queue.size() == WINDOW_SIZE) {
@@ -110,9 +109,11 @@ public class Downloader {
                 if (!poll) {
                     repeat--;
                 }
+                repeat--;
             }
             queue.offer(true);
             repeat++;
+            total++;
         }
 
         public void increment() {
@@ -123,10 +124,11 @@ public class Downloader {
                 }
             }
             queue.offer(false);
+            total++;
         }
 
         public boolean overflow() {
-            if (queue.size() < MIN_REPEAT_NUM * MIN_REPEAT_PAGE) {
+            if (total < MIN_REPEAT_NUM * MIN_REPEAT_PAGE) {
                 return false;
             }
             if (repeat * 100 / queue.size() > REPEAT_RATIO) {
@@ -164,18 +166,27 @@ public class Downloader {
             long maxTotal = 0L;
 
             DoubanListRequestBO requestBO = new DoubanListRequestBO();
+            requestBO.setPage(0);
             requestBO.setKey(place);
 
             while (total < maxTotal) {
                 try {
+                    requestBO.setPage(requestBO.getPage() + 1);
                     DoubanListResponseDTO responseDTO = doubanSearchClient.getDoubanList(requestBO);
                     List<DoubanListResponseDTO.ItemDTO> dataList = responseDTO.getDataList();
                     if (CollUtil.isEmpty(dataList)) {
                         break;
                     }
-                    List<DoubanListResponseDTO.ItemDTO> newDataList = filter(dataList, window, filterMask);
-                    if (CollUtil.isEmpty(newDataList)) {
+
+                    List<DoubanListResponseDTO.ItemDTO> newDataList = null;
+                    try {
+                        newDataList = filter(dataList, window, filterMask);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         break;
+                    }
+                    if (CollUtil.isEmpty(newDataList)) {
+                        continue;
                     }
 
                     getDetail(doubanSearchClient, newDataList, pipe);
@@ -183,15 +194,14 @@ public class Downloader {
                     PageInfoDTO pageInfo = responseDTO.getPageInfo();
                     maxTotal = pageInfo.getTotal();
                     total += dataList.size();
-
-                    requestBO.setPage(requestBO.getPage() + 1);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 } finally {
                     total = Math.max(total, 0L);
                 }
             }
             action.setFinish();
+            System.out.println("=== Downloader 下载完成 ===");
         }).start();
 
         return pipe;
@@ -220,7 +230,7 @@ public class Downloader {
                 window.increment();
             }
             if (window.overflow()) {
-                return Collections.emptyList();
+                throw new RuntimeException("重复数据过多！");
             }
         }
 
@@ -268,7 +278,7 @@ public class Downloader {
         CompletableFuture<Void> oneFuture = CompletableFuture.allOf(completableFutures);
 
         try {
-            oneFuture.get((long) MAX_TIME_OUT * dataList.size(), TimeUnit.SECONDS);
+            oneFuture.get((long) MAX_TIME_OUT * dataList.size(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }

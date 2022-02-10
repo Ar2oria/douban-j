@@ -9,7 +9,7 @@ public class Tag {
 
     private Long doubanId;
 
-    private String text;
+    private String tagText;
 
     private Date createAt;
 
@@ -31,12 +31,12 @@ public class Tag {
         this.doubanId = doubanId;
     }
 
-    public String getText() {
-        return text;
+    public String getTagText() {
+        return tagText;
     }
 
-    public void setText(String text) {
-        this.text = text == null ? null : text.trim();
+    public void setTagText(String tagText) {
+        this.tagText = tagText == null ? null : tagText.trim();
     }
 
     public Date getCreateAt() {
@@ -76,8 +76,8 @@ public class Tag {
             return this;
         }
 
-        public Builder text(String text) {
-            obj.setText(text);
+        public Builder tagText(String tagText) {
+            obj.setTagText(tagText);
             return this;
         }
 
@@ -99,7 +99,7 @@ public class Tag {
     public enum Column {
         id("id", "id", "BIGINT", false),
         doubanId("douban_id", "doubanId", "BIGINT", false),
-        text("text", "text", "VARCHAR", false),
+        tagText("tag_text", "tagText", "VARCHAR", false),
         createAt("create_at", "createAt", "TIMESTAMP", false),
         nature("nature", "nature", "VARCHAR", false);
 

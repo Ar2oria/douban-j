@@ -8,6 +8,8 @@ import cc.w0rm.douban.util.CollUtil;
 import cc.w0rm.douban.util.FileUtil;
 import cc.w0rm.douban.util.JsonUtil;
 import com.google.common.collect.Sets;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.library.DicLibrary;
@@ -15,8 +17,11 @@ import org.ansj.splitWord.analysis.DicAnalysis;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author xuyang
@@ -24,10 +29,12 @@ import java.util.regex.Pattern;
  */
 public class TextProcessor {
 
-    private static final Set<String> CUSTOMER_NAS = Sets.newHashSet("facility", "house", "subway", "street", "area");
-    private static final Set<String> DEFAULT_NAS = Sets.newHashSet("m", "nr", "ns");
+    public static final Set<String> CUSTOMER_NAS = Sets.newHashSet(Nature.FACILITY.getDesc(),
+            Nature.HOUSE.getDesc(), Nature.AREA.getDesc(), Nature.STREET.getDesc(), Nature.SUBWAY.getDesc());
+    public static final Set<String> DEFAULT_NAS = Sets.newHashSet(Nature.M.getDesc(),
+            Nature.NS.getDesc(), Nature.NR.getDesc());
 
-    private static final int MIN_M_NATURE_LENGTH = 2;
+    private static final int MIN_M_NATURE_LENGTH = 3;
 
     static class TextProducerAction implements ProducerAction {
 
@@ -86,6 +93,7 @@ public class TextProcessor {
                 pipe.putTask(task);
             }
             action.setFinish();
+            System.out.println("=== TextProcessor 文本解析完成===");
         }).start();
 
         return pipe;
@@ -126,6 +134,28 @@ public class TextProcessor {
         return matcher.replaceAll("");
     }
 
+    @Getter
+    @AllArgsConstructor
+    enum Nature {
+        FACILITY("facility", 13),
+        HOUSE("house", 14),
+        STREET("street", 15),
+        SUBWAY("subway", 16),
+        AREA("area", 17),
+        M("m", 1),
+        NR("nr", 2),
+        NS("ns", 3);
+        private String desc;
+        private int code;
+
+        private static final Map<String, Nature> INNER_MAP = Stream.of(values())
+                .collect(Collectors.toMap(Nature::getDesc, Function.identity()));
+
+        public static Nature getEnumByDesc(String desc) {
+            return INNER_MAP.get(desc);
+        }
+
+    }
 
     static class DoubanAnalysis {
 
@@ -137,19 +167,19 @@ public class TextProcessor {
             List<String> words = null;
 
             words = FileUtil.readResources("library/facilities.txt");
-            loadDic(words, "facility", 99999);
+            loadDic(words, Nature.FACILITY.getDesc(), 99999);
 
             words = FileUtil.readResources("library/house.txt");
-            loadDic(words, "house", 99999);
+            loadDic(words, Nature.HOUSE.getDesc(), 99999);
 
             words = FileUtil.readResources("library/subways.txt");
-            loadDic(words, "subway", 99999);
+            loadDic(words, Nature.SUBWAY.getDesc(), 99999);
 
             words = FileUtil.readResources("library/streets.txt");
-            loadDic(words, "street", 99999);
+            loadDic(words, Nature.STREET.getDesc(), 99999);
 
             words = FileUtil.readResources("library/area.txt");
-            loadDic(words, "area", 99999);
+            loadDic(words, Nature.AREA.getDesc(), 99999);
 
         }
 

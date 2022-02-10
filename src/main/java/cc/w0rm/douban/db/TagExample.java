@@ -362,103 +362,103 @@ public class TagExample {
             return (Criteria) this;
         }
 
-        public Criteria andTextIsNull() {
-            addCriterion("text is null");
+        public Criteria andTagTextIsNull() {
+            addCriterion("tag_text is null");
             return (Criteria) this;
         }
 
-        public Criteria andTextIsNotNull() {
-            addCriterion("text is not null");
+        public Criteria andTagTextIsNotNull() {
+            addCriterion("tag_text is not null");
             return (Criteria) this;
         }
 
-        public Criteria andTextEqualTo(String value) {
-            addCriterion("text =", value, "text");
+        public Criteria andTagTextEqualTo(String value) {
+            addCriterion("tag_text =", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextEqualToColumn(Tag.Column column) {
-            addCriterion(new StringBuilder("text = ").append(column.getEscapedColumnName()).toString());
+        public Criteria andTagTextEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("tag_text = ").append(column.getEscapedColumnName()).toString());
             return (Criteria) this;
         }
 
-        public Criteria andTextNotEqualTo(String value) {
-            addCriterion("text <>", value, "text");
+        public Criteria andTagTextNotEqualTo(String value) {
+            addCriterion("tag_text <>", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextNotEqualToColumn(Tag.Column column) {
-            addCriterion(new StringBuilder("text <> ").append(column.getEscapedColumnName()).toString());
+        public Criteria andTagTextNotEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("tag_text <> ").append(column.getEscapedColumnName()).toString());
             return (Criteria) this;
         }
 
-        public Criteria andTextGreaterThan(String value) {
-            addCriterion("text >", value, "text");
+        public Criteria andTagTextGreaterThan(String value) {
+            addCriterion("tag_text >", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextGreaterThanColumn(Tag.Column column) {
-            addCriterion(new StringBuilder("text > ").append(column.getEscapedColumnName()).toString());
+        public Criteria andTagTextGreaterThanColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("tag_text > ").append(column.getEscapedColumnName()).toString());
             return (Criteria) this;
         }
 
-        public Criteria andTextGreaterThanOrEqualTo(String value) {
-            addCriterion("text >=", value, "text");
+        public Criteria andTagTextGreaterThanOrEqualTo(String value) {
+            addCriterion("tag_text >=", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextGreaterThanOrEqualToColumn(Tag.Column column) {
-            addCriterion(new StringBuilder("text >= ").append(column.getEscapedColumnName()).toString());
+        public Criteria andTagTextGreaterThanOrEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("tag_text >= ").append(column.getEscapedColumnName()).toString());
             return (Criteria) this;
         }
 
-        public Criteria andTextLessThan(String value) {
-            addCriterion("text <", value, "text");
+        public Criteria andTagTextLessThan(String value) {
+            addCriterion("tag_text <", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextLessThanColumn(Tag.Column column) {
-            addCriterion(new StringBuilder("text < ").append(column.getEscapedColumnName()).toString());
+        public Criteria andTagTextLessThanColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("tag_text < ").append(column.getEscapedColumnName()).toString());
             return (Criteria) this;
         }
 
-        public Criteria andTextLessThanOrEqualTo(String value) {
-            addCriterion("text <=", value, "text");
+        public Criteria andTagTextLessThanOrEqualTo(String value) {
+            addCriterion("tag_text <=", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextLessThanOrEqualToColumn(Tag.Column column) {
-            addCriterion(new StringBuilder("text <= ").append(column.getEscapedColumnName()).toString());
+        public Criteria andTagTextLessThanOrEqualToColumn(Tag.Column column) {
+            addCriterion(new StringBuilder("tag_text <= ").append(column.getEscapedColumnName()).toString());
             return (Criteria) this;
         }
 
-        public Criteria andTextLike(String value) {
-            addCriterion("text like", value, "text");
+        public Criteria andTagTextLike(String value) {
+            addCriterion("tag_text like", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextNotLike(String value) {
-            addCriterion("text not like", value, "text");
+        public Criteria andTagTextNotLike(String value) {
+            addCriterion("tag_text not like", value, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextIn(List<String> values) {
-            addCriterion("text in", values, "text");
+        public Criteria andTagTextIn(List<String> values) {
+            addCriterion("tag_text in", values, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextNotIn(List<String> values) {
-            addCriterion("text not in", values, "text");
+        public Criteria andTagTextNotIn(List<String> values) {
+            addCriterion("tag_text not in", values, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextBetween(String value1, String value2) {
-            addCriterion("text between", value1, value2, "text");
+        public Criteria andTagTextBetween(String value1, String value2) {
+            addCriterion("tag_text between", value1, value2, "tagText");
             return (Criteria) this;
         }
 
-        public Criteria andTextNotBetween(String value1, String value2) {
-            addCriterion("text not between", value1, value2, "text");
+        public Criteria andTagTextNotBetween(String value1, String value2) {
+            addCriterion("tag_text not between", value1, value2, "tagText");
             return (Criteria) this;
         }
 

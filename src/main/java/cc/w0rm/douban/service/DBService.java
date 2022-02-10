@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  */
 public class DBService {
 
-
     static class MapperManager {
         private static final InputStream INPUT_STREAM = createInputStream();
         private static SqlSessionFactory sqlSessionFactory;
@@ -50,7 +49,7 @@ public class DBService {
                 sqlSessionFactory = new SqlSessionFactoryBuilder().build(INPUT_STREAM);
             }
             if (Objects.isNull(sqlSession)) {
-                sqlSession = sqlSessionFactory.openSession();
+                sqlSession = sqlSessionFactory.openSession(true);
             }
             return sqlSession;
         }
@@ -86,7 +85,7 @@ public class DBService {
             douban.setId(oldDouban.getId());
             doubanMapper.updateByPrimaryKeySelective(douban);
         } else {
-            doubanMapper.insert(douban);
+            doubanMapper.insertSelective(douban);
         }
 
         if (CollUtil.isEmpty(task.getTagMap())) {
@@ -106,13 +105,37 @@ public class DBService {
                 .map(tag -> {
                     Tag t = new Tag();
                     t.setDoubanId(douban.getId());
-                    t.setText(tag);
+                    t.setTagText(tag);
                     t.setNature(task.getTagMap().get(tag));
                     return t;
                 }).collect(Collectors.toList());
-        tagMapper.batchInsert(tagEntityList);
+        tagMapper.batchInsertSelective(tagEntityList, Tag.Column.doubanId, Tag.Column.tagText, Tag.Column.nature);
 
         return douban.getId();
+    }
+
+    public List<Douban> selectDoubanByPlace(String place) {
+        if (StringUtils.isBlank(place)) {
+            return Collections.emptyList();
+        }
+        TagMapper tagMapper = MapperManager.getMapper(TagMapper.class);
+        TagExample example = new TagExample();
+        example.createCriteria()
+                .andTagTextLike(place + "%");
+        List<Tag> tags = tagMapper.selectByExample(example);
+        if (CollUtil.isEmpty(tags)) {
+            return Collections.emptyList();
+        }
+
+        return selectDoubanByTagList(tags);
+    }
+
+    public List<Tag> selectTagByDoubanIdList(List<Long> doubanIdList) {
+        TagMapper tagMapper = MapperManager.getMapper(TagMapper.class);
+        TagExample example = new TagExample();
+        example.createCriteria()
+                .andDoubanIdIn(doubanIdList);
+        return tagMapper.selectByExample(example);
     }
 
     public List<Douban> selectDoubanByWebIdList(List<Long> webIdList) {
@@ -141,13 +164,21 @@ public class DBService {
         return doubanMapper.selectByExample(example);
     }
 
-    public List<Douban> selectDoubanByTagList(List<String> tagList) {
+    public List<Douban> selectDoubanByTagTextList(List<String> tagList) {
         TagMapper tagMapper = MapperManager.getMapper(TagMapper.class);
         TagExample tagExample = new TagExample();
         tagExample.createCriteria()
-                .andTextIn(tagList);
+                .andTagTextIn(tagList);
         List<Tag> tags = tagMapper.selectByExample(tagExample);
-        if (Objects.isNull(tags)) {
+        if (CollUtil.isEmpty(tags)) {
+            return Collections.emptyList();
+        }
+
+        return selectDoubanByTagList(tags);
+    }
+
+    private List<Douban> selectDoubanByTagList(List<Tag> tags) {
+        if (CollUtil.isEmpty(tags)) {
             return Collections.emptyList();
         }
         List<Long> doubanIdList = tags.stream()
@@ -205,18 +236,22 @@ public class DBService {
     }
 
     public void save(Pipe<DoubanAnalyseModel> doubanAnalyseModelPipe) {
-        while (!doubanAnalyseModelPipe.finished()) {
-            DoubanAnalyseModel task = doubanAnalyseModelPipe.getTask();
-            if (Objects.isNull(task)) {
-                return;
-            }
+        new Thread(() -> {
+            while (!doubanAnalyseModelPipe.finished()) {
+                DoubanAnalyseModel task = doubanAnalyseModelPipe.getTask();
+                if (Objects.isNull(task)) {
+                    return;
+                }
 
-            try {
-                saveDouban(task);
-            } catch (Exception e) {
-                e.printStackTrace();
+                try {
+                    saveDouban(task);
+                    System.out.println("处理成功:" + task.getItem().getUrl());
+                } catch (Exception e) {
+                    System.out.println("保存失败:" + task.getItem().getUrl());
+                    e.printStackTrace();
+                }
             }
-        }
-
+            System.out.println("=== 数据库 所有数据处理完成 ===");
+        }).start();
     }
 }

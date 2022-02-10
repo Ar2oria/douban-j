@@ -12,7 +12,7 @@ import java.util.Objects;
 @Data
 public class DoubanListRequestBO {
 
-    private static final String URL_TEMPLATE = "http://uz.yurixu.com/uz/index/getList?city={city}&order={order}&page={page}&pageSize={pageSize}&key={key}&_={timestamp}";
+    private static final String URL_TEMPLATE = "http://uz.yurixu.com/uz/index/getList?city={city}&order={order}&offset={offset}&limit={limit}&page={page}&pageSize={pageSize}&key={key}&_={timestamp}";
 
     @AllArgsConstructor
     @Getter
@@ -35,6 +35,8 @@ public class DoubanListRequestBO {
     public String getUrl() {
         return URL_TEMPLATE.replace("{city}", city)
                 .replace("{order}", order.getDesc())
+                .replace("{offset}", ((page - 1) * pageSize) + "")
+                .replace("{limit}", pageSize.toString())
                 .replace("{page}", page.toString())
                 .replace("{pageSize}", pageSize.toString())
                 .replace("{key}", UrlUtil.encode(StringUtils.isBlank(key) ? "" : key))

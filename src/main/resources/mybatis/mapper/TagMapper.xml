@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="cc.w0rm.douban.db.Tag">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="douban_id" jdbcType="BIGINT" property="doubanId" />
-    <result column="text" jdbcType="VARCHAR" property="text" />
+    <result column="tag_text" jdbcType="VARCHAR" property="tagText" />
     <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
     <result column="nature" jdbcType="VARCHAR" property="nature" />
   </resultMap>
@@ -67,7 +67,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, douban_id, text, create_at, nature
+    id, douban_id, tag_text, create_at, nature
   </sql>
   <select id="selectByExample" parameterType="cc.w0rm.douban.db.TagExample" resultMap="BaseResultMap">
     select
@@ -108,9 +108,9 @@
     </if>
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cc.w0rm.douban.db.Tag" useGeneratedKeys="true">
-    insert into tag (douban_id, text, create_at, 
+    insert into tag (douban_id, tag_text, create_at, 
       nature)
-    values (#{doubanId,jdbcType=BIGINT}, #{text,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, 
+    values (#{doubanId,jdbcType=BIGINT}, #{tagText,jdbcType=VARCHAR}, #{createAt,jdbcType=TIMESTAMP}, 
       #{nature,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cc.w0rm.douban.db.Tag" useGeneratedKeys="true">
@@ -119,8 +119,8 @@
       <if test="doubanId != null">
         douban_id,
       </if>
-      <if test="text != null">
-        text,
+      <if test="tagText != null">
+        tag_text,
       </if>
       <if test="createAt != null">
         create_at,
@@ -133,8 +133,8 @@
       <if test="doubanId != null">
         #{doubanId,jdbcType=BIGINT},
       </if>
-      <if test="text != null">
-        #{text,jdbcType=VARCHAR},
+      <if test="tagText != null">
+        #{tagText,jdbcType=VARCHAR},
       </if>
       <if test="createAt != null">
         #{createAt,jdbcType=TIMESTAMP},
@@ -159,8 +159,8 @@
       <if test="record.doubanId != null">
         douban_id = #{record.doubanId,jdbcType=BIGINT},
       </if>
-      <if test="record.text != null">
-        text = #{record.text,jdbcType=VARCHAR},
+      <if test="record.tagText != null">
+        tag_text = #{record.tagText,jdbcType=VARCHAR},
       </if>
       <if test="record.createAt != null">
         create_at = #{record.createAt,jdbcType=TIMESTAMP},
@@ -177,7 +177,7 @@
     update tag
     set id = #{record.id,jdbcType=BIGINT},
       douban_id = #{record.doubanId,jdbcType=BIGINT},
-      text = #{record.text,jdbcType=VARCHAR},
+      tag_text = #{record.tagText,jdbcType=VARCHAR},
       create_at = #{record.createAt,jdbcType=TIMESTAMP},
       nature = #{record.nature,jdbcType=VARCHAR}
     <if test="_parameter != null">
@@ -190,8 +190,8 @@
       <if test="doubanId != null">
         douban_id = #{doubanId,jdbcType=BIGINT},
       </if>
-      <if test="text != null">
-        text = #{text,jdbcType=VARCHAR},
+      <if test="tagText != null">
+        tag_text = #{tagText,jdbcType=VARCHAR},
       </if>
       <if test="createAt != null">
         create_at = #{createAt,jdbcType=TIMESTAMP},
@@ -205,7 +205,7 @@
   <update id="updateByPrimaryKey" parameterType="cc.w0rm.douban.db.Tag">
     update tag
     set douban_id = #{doubanId,jdbcType=BIGINT},
-      text = #{text,jdbcType=VARCHAR},
+      tag_text = #{tagText,jdbcType=VARCHAR},
       create_at = #{createAt,jdbcType=TIMESTAMP},
       nature = #{nature,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
@@ -226,10 +226,10 @@
   </select>
   <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
     insert into tag
-    (douban_id, text, create_at, nature)
+    (douban_id, tag_text, create_at, nature)
     values
     <foreach collection="list" item="item" separator=",">
-      (#{item.doubanId,jdbcType=BIGINT}, #{item.text,jdbcType=VARCHAR}, #{item.createAt,jdbcType=TIMESTAMP}, 
+      (#{item.doubanId,jdbcType=BIGINT}, #{item.tagText,jdbcType=VARCHAR}, #{item.createAt,jdbcType=TIMESTAMP}, 
         #{item.nature,jdbcType=VARCHAR})
     </foreach>
   </insert>
@@ -246,8 +246,8 @@
         <if test="'douban_id'.toString() == column.value">
           #{item.doubanId,jdbcType=BIGINT}
         </if>
-        <if test="'text'.toString() == column.value">
-          #{item.text,jdbcType=VARCHAR}
+        <if test="'tag_text'.toString() == column.value">
+          #{item.tagText,jdbcType=VARCHAR}
         </if>
         <if test="'create_at'.toString() == column.value">
           #{item.createAt,jdbcType=TIMESTAMP}
