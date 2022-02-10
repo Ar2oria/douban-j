@@ -96,8 +96,10 @@ public class Downloader {
 
     static class StatisticsWindow {
         private static final int WINDOW_SIZE = 20;
-        private static final int MIN_REPEAT_NUM = 20;
+        private static final int MIN_REPEAT_NUM = 30;
+        private static final int MIN_REPEAT_PAGE = 3;
         private static final int REPEAT_RATIO = 90;
+
 
         private Queue<Boolean> queue = new ArrayDeque<>();
         private int repeat = 0;
@@ -124,7 +126,7 @@ public class Downloader {
         }
 
         public boolean overflow() {
-            if (queue.size() < MIN_REPEAT_NUM) {
+            if (queue.size() < MIN_REPEAT_NUM * MIN_REPEAT_PAGE) {
                 return false;
             }
             if (repeat * 100 / queue.size() > REPEAT_RATIO) {
