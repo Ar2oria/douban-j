@@ -179,6 +179,14 @@ public class Downloader {
                         break;
                     }
 
+                    PageInfoDTO pageInfo = responseDTO.getPageInfo();
+                    maxTotal = pageInfo.getTotal();
+                    if (total == -1L){
+                        total = dataList.size();
+                    }else {
+                        total += dataList.size();
+                    }
+
                     List<DoubanListResponseDTO.ItemDTO> newDataList = null;
                     try {
                         newDataList = filter(dataList, day, window, filterMask);
@@ -191,14 +199,8 @@ public class Downloader {
                     }
 
                     getDetail(doubanSearchClient, newDataList, pipe);
-
-                    PageInfoDTO pageInfo = responseDTO.getPageInfo();
-                    maxTotal = pageInfo.getTotal();
-                    total += dataList.size();
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    total = Math.max(total, 0L);
                 }
             }
             action.setFinish();
