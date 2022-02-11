@@ -109,6 +109,12 @@ public class DoubanEngine {
 
                 Set<String> tagSet = new HashSet<>(tagList);
                 Collections.sort(doubanList, (a, b) -> {
+                    String aPredictPrice = a.getPredictPrice();
+                    String bPredictPrice = b.getPredictPrice();
+                    if (!aPredictPrice.equals(bPredictPrice)) {
+                        return bPredictPrice.compareTo(aPredictPrice);
+                    }
+
                     List<Tag> aTagList = doubanTagMap.getOrDefault(a.getId(), Collections.emptyList());
                     List<Tag> bTagList = doubanTagMap.getOrDefault(b.getId(), Collections.emptyList());
 
