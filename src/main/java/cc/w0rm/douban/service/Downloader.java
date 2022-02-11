@@ -258,15 +258,18 @@ public class Downloader {
                         doubanHtml = doubanSearchClient.getDoubanHtml(item.getUrl());
 
                         int intevalInt = interval.get();
-                        Thread.sleep(intevalInt);
-
                         intevalInt /= 2;
                         intevalInt = Math.max(intevalInt, INTERVAL);
                         interval.set(intevalInt);
-
                     } catch (Exception e) {
                         interval.set(interval.get() * 2);
                         e.printStackTrace();
+                    } finally {
+                        try {
+                            Thread.sleep(interval.get());
+                        } catch (Exception e) {
+                            //do nothing
+                        }
                     }
                     return Pair.of(item, doubanHtml);
                 }, EXECUTOR_SERVICE).whenComplete((r, e) -> {

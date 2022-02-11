@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class DoubanEngine {
 
     public static void run(String place, List<String> tagList, int day, String cookie) {
-        preProcessTagList(tagList);
         DBService service = new DBService();
         Pipe<DoubanAnalyseModel> pipeWebResource = Downloader.search(place, cookie, day, service.getFilter());
         Pipe<DoubanAnalyseModel> pipeText = TextProcessor.process(pipeWebResource);
@@ -27,23 +26,20 @@ public class DoubanEngine {
         search(service, pipeText, place, tagList, day);
     }
 
-    private static void preProcessTagList(List<String> tagList) {
-        if (CollUtil.isEmpty(tagList)) {
-            return;
-        }
-        if (tagList.contains("无中介")) {
-            tagList.add("无中介费");
-            tagList.add("免中介费");
-            tagList.add("没中介费");
-            tagList.add("没有中介费");
+    private static List<String> getSystemTagList() {
+        List<String> tagList = new ArrayList<>();
+        tagList.add("无中介费");
+        tagList.add("免中介费");
+        tagList.add("没中介费");
+        tagList.add("没有中介费");
 
-            tagList.add("无服务费");
-            tagList.add("免服务费");
-            tagList.add("没服务费");
-            tagList.add("没有服务费");
+        tagList.add("无服务费");
+        tagList.add("免服务费");
+        tagList.add("没服务费");
+        tagList.add("没有服务费");
 
-            tagList.add("房东直租");
-        }
+        tagList.add("房东直租");
+        return tagList;
     }
 
     private static void search(DBService service, Pipe<DoubanAnalyseModel> pipe, String place, List<String> tagList, int day) {
@@ -68,13 +64,29 @@ public class DoubanEngine {
                 List<Long> doubanIdList = doubanList.stream()
                         .map(Douban::getId)
                         .collect(Collectors.toList());
-                if (CollUtil.isEmpty(doubanIdList)) {
-                    continue;
-                }
-
                 Map<Long, List<Tag>> doubanTagMap = service.selectTagByDoubanIdList(doubanIdList).stream()
                         .collect(Collectors.groupingBy(Tag::getDoubanId));
 
+                filterSet.addAll(doubanIdList);
+
+                Set<String> systemTagSet = new HashSet<>(getSystemTagList());
+                if (!CollUtil.isEmpty(systemTagSet)) {
+                    doubanList = doubanList.stream()
+                            .filter(douban -> {
+                                List<Tag> tags = doubanTagMap.get(douban.getId());
+                                if (CollUtil.isEmpty(tags)) {
+                                    return false;
+                                }
+                                Set<String> tNameSet = tags.stream()
+                                        .map(Tag::getTagText)
+                                        .filter(systemTagSet::contains)
+                                        .collect(Collectors.toSet());
+
+                                return !tNameSet.isEmpty();
+                            }).collect(Collectors.toList());
+                }
+
+                Set<String> useTagSet = new HashSet<>(tagList);
                 if (!CollUtil.isEmpty(tagList)) {
                     doubanList = doubanList.stream()
                             .filter(douban -> {
@@ -86,10 +98,8 @@ public class DoubanEngine {
                                         .map(Tag::getTagText)
                                         .collect(Collectors.toSet());
 
-                                Set<String> tagSet = new HashSet<>(tagList);
-                                tagSet.retainAll(tNameSet);
-
-                                return tagSet.size() > 0;
+                                tNameSet.retainAll(useTagSet);
+                                return tNameSet.size() == useTagSet.size();
                             }).collect(Collectors.toList());
                     if (CollUtil.isEmpty(doubanList)) {
                         continue;
@@ -160,7 +170,6 @@ public class DoubanEngine {
 
                     System.out.println("| " + douban.getId() + " | " + DateUtil.format(douban.getPubTime()) + " | " + douban.getTitle() + " | " + douban.getUrl() + " | " + tagStr + " |");
                 }
-                filterSet.addAll(doubanIdList);
             } catch (Exception e) {
                 e.printStackTrace();
             }
