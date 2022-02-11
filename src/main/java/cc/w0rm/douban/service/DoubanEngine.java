@@ -99,7 +99,7 @@ public class DoubanEngine {
                                         .collect(Collectors.toSet());
 
                                 tNameSet.retainAll(useTagSet);
-                                return tNameSet.size() == useTagSet.size();
+                                return !tNameSet.isEmpty();
                             }).collect(Collectors.toList());
                     if (CollUtil.isEmpty(doubanList)) {
                         continue;
