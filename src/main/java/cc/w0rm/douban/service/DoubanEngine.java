@@ -169,7 +169,7 @@ public class DoubanEngine {
                                 .collect(Collectors.joining(","));
                     }
 
-                    System.out.println("| " + douban.getId() + " | " + DateUtil.format(douban.getPubTime()) + " | " + douban.getTitle() + " | " + douban.getUrl() + " | " + tagStr + " |");
+                    System.out.println("| " + douban.getId() + " | " + DateUtil.format(douban.getPubTime()) + " | " + douban.getAuthor() + " ｜ " + douban.getTitle() + " | " + douban.getPredictPrice() + " | " + douban.getUrl() + " | " + tagStr + " |");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
