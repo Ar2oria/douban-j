@@ -76,6 +76,7 @@ public class DBService {
         douban.setPubTime(item.getPubTime());
         douban.setWebId(webId);
         douban.setContent(task.getHtmlContent());
+        douban.setPredictPrice(task.getPrice());
 
         Douban oldDouban = selectDoubanByWebId(webId);
         if (Objects.nonNull(oldDouban)) {

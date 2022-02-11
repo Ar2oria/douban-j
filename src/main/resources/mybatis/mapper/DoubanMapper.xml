@@ -11,6 +11,7 @@
     <result column="create_at" jdbcType="TIMESTAMP" property="createAt" />
     <result column="web_id" jdbcType="BIGINT" property="webId" />
     <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="predict_price" jdbcType="VARCHAR" property="predictPrice" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -71,7 +72,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, title, url, author, author_url, pub_time, create_at, web_id, content
+    id, title, url, author, author_url, pub_time, create_at, web_id, content, predict_price
   </sql>
   <select id="selectByExample" parameterType="cc.w0rm.douban.db.DoubanExample" resultMap="BaseResultMap">
     select
@@ -114,10 +115,12 @@
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cc.w0rm.douban.db.Douban" useGeneratedKeys="true">
     insert into douban (title, url, author, 
       author_url, pub_time, create_at, 
-      web_id, content)
+      web_id, content, predict_price
+      )
     values (#{title,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{author,jdbcType=VARCHAR}, 
       #{authorUrl,jdbcType=VARCHAR}, #{pubTime,jdbcType=TIMESTAMP}, #{createAt,jdbcType=TIMESTAMP}, 
-      #{webId,jdbcType=BIGINT}, #{content,jdbcType=VARCHAR})
+      #{webId,jdbcType=BIGINT}, #{content,jdbcType=VARCHAR}, #{predictPrice,jdbcType=VARCHAR}
+      )
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cc.w0rm.douban.db.Douban" useGeneratedKeys="true">
     insert into douban
@@ -146,6 +149,9 @@
       <if test="content != null">
         content,
       </if>
+      <if test="predictPrice != null">
+        predict_price,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="title != null">
@@ -171,6 +177,9 @@
       </if>
       <if test="content != null">
         #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="predictPrice != null">
+        #{predictPrice,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -210,6 +219,9 @@
       <if test="record.content != null">
         content = #{record.content,jdbcType=VARCHAR},
       </if>
+      <if test="record.predictPrice != null">
+        predict_price = #{record.predictPrice,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -225,7 +237,8 @@
       pub_time = #{record.pubTime,jdbcType=TIMESTAMP},
       create_at = #{record.createAt,jdbcType=TIMESTAMP},
       web_id = #{record.webId,jdbcType=BIGINT},
-      content = #{record.content,jdbcType=VARCHAR}
+      content = #{record.content,jdbcType=VARCHAR},
+      predict_price = #{record.predictPrice,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -257,6 +270,9 @@
       <if test="content != null">
         content = #{content,jdbcType=VARCHAR},
       </if>
+      <if test="predictPrice != null">
+        predict_price = #{predictPrice,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -269,7 +285,8 @@
       pub_time = #{pubTime,jdbcType=TIMESTAMP},
       create_at = #{createAt,jdbcType=TIMESTAMP},
       web_id = #{webId,jdbcType=BIGINT},
-      content = #{content,jdbcType=VARCHAR}
+      content = #{content,jdbcType=VARCHAR},
+      predict_price = #{predictPrice,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectByExampleWithRowbounds" parameterType="cc.w0rm.douban.db.DoubanExample" resultMap="BaseResultMap">
@@ -288,12 +305,14 @@
   </select>
   <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
     insert into douban
-    (title, url, author, author_url, pub_time, create_at, web_id, content)
+    (title, url, author, author_url, pub_time, create_at, web_id, content, predict_price
+      )
     values
     <foreach collection="list" item="item" separator=",">
       (#{item.title,jdbcType=VARCHAR}, #{item.url,jdbcType=VARCHAR}, #{item.author,jdbcType=VARCHAR}, 
         #{item.authorUrl,jdbcType=VARCHAR}, #{item.pubTime,jdbcType=TIMESTAMP}, #{item.createAt,jdbcType=TIMESTAMP}, 
-        #{item.webId,jdbcType=BIGINT}, #{item.content,jdbcType=VARCHAR})
+        #{item.webId,jdbcType=BIGINT}, #{item.content,jdbcType=VARCHAR}, #{item.predictPrice,jdbcType=VARCHAR}
+        )
     </foreach>
   </insert>
   <insert id="batchInsertSelective" keyColumn="id" keyProperty="list.id" parameterType="map" useGeneratedKeys="true">
@@ -329,6 +348,9 @@
         </if>
         <if test="'content'.toString() == column.value">
           #{item.content,jdbcType=VARCHAR}
+        </if>
+        <if test="'predict_price'.toString() == column.value">
+          #{item.predictPrice,jdbcType=VARCHAR}
         </if>
       </foreach>
       )

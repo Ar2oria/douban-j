@@ -74,6 +74,8 @@ public class TextProcessor {
                 List<Term> terms = result.getTerms();
                 Map<String, String> tagMap = new HashMap<>(terms.size() / 2);
 
+                String predictPrice = StringUtils.EMPTY;
+
                 for (Term t : terms) {
                     String natureStr = t.getNatureStr();
                     if (!CUSTOMER_NAS.contains(natureStr) && !DEFAULT_NAS.contains(natureStr)) {
@@ -82,6 +84,10 @@ public class TextProcessor {
                     if (DEFAULT_NAS.contains(natureStr) && t.getName().length() < MIN_M_NATURE_LENGTH) {
                         continue;
                     }
+                    if (Nature.M.getDesc().equals(natureStr)) {
+                        predictPrice = predictPriceFromName(t.getName(), predictPrice);
+                    }
+
                     tagMap.put(t.getName(), natureStr);
                 }
 
@@ -89,6 +95,7 @@ public class TextProcessor {
                 task.setContentMap(contentMap);
                 task.setResult(result);
                 task.setTagMap(tagMap);
+                task.setPrice(predictPrice);
 
                 pipe.putTask(task);
             }
@@ -97,6 +104,44 @@ public class TextProcessor {
         }).start();
 
         return pipe;
+    }
+
+
+    private static final Pattern PATTERN_PRICE = Pattern.compile("[1-9][0-9]{2}0");
+    private static final String PRICE_SPLIT = ".";
+
+    private static String predictPriceFromName(String name, String prePrice) {
+        if (StringUtils.isBlank(name)) {
+            return prePrice;
+        }
+        try {
+            Matcher matcher = PATTERN_PRICE.matcher(name);
+            if (!matcher.find()) {
+                return prePrice;
+            }
+            String priceStr = matcher.group();
+            int price = Integer.parseInt(priceStr);
+            if (StringUtils.isBlank(prePrice)) {
+                return price + PRICE_SPLIT + price;
+            }
+
+            String[] split = new String[2];
+            split[0] = prePrice.substring(0, 4);
+            split[1] = prePrice.substring(5);
+
+            int min = Integer.parseInt(split[0]);
+            int max = Integer.parseInt(split[1]);
+            if (price > max) {
+                return min + PRICE_SPLIT + price;
+            } else if (price < min) {
+                return price + PRICE_SPLIT + max;
+            }
+
+            return prePrice;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return prePrice;
+        }
     }
 
     private static Map<String, Object> getContentMap(String mainContent) {

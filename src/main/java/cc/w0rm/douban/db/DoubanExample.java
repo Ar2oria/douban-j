@@ -1041,6 +1041,106 @@ public class DoubanExample {
             addCriterion("content not between", value1, value2, "content");
             return (Criteria) this;
         }
+
+        public Criteria andPredictPriceIsNull() {
+            addCriterion("predict_price is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceIsNotNull() {
+            addCriterion("predict_price is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceEqualTo(String value) {
+            addCriterion("predict_price =", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceEqualToColumn(Douban.Column column) {
+            addCriterion(new StringBuilder("predict_price = ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceNotEqualTo(String value) {
+            addCriterion("predict_price <>", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceNotEqualToColumn(Douban.Column column) {
+            addCriterion(new StringBuilder("predict_price <> ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceGreaterThan(String value) {
+            addCriterion("predict_price >", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceGreaterThanColumn(Douban.Column column) {
+            addCriterion(new StringBuilder("predict_price > ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceGreaterThanOrEqualTo(String value) {
+            addCriterion("predict_price >=", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceGreaterThanOrEqualToColumn(Douban.Column column) {
+            addCriterion(new StringBuilder("predict_price >= ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceLessThan(String value) {
+            addCriterion("predict_price <", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceLessThanColumn(Douban.Column column) {
+            addCriterion(new StringBuilder("predict_price < ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceLessThanOrEqualTo(String value) {
+            addCriterion("predict_price <=", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceLessThanOrEqualToColumn(Douban.Column column) {
+            addCriterion(new StringBuilder("predict_price <= ").append(column.getEscapedColumnName()).toString());
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceLike(String value) {
+            addCriterion("predict_price like", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceNotLike(String value) {
+            addCriterion("predict_price not like", value, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceIn(List<String> values) {
+            addCriterion("predict_price in", values, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceNotIn(List<String> values) {
+            addCriterion("predict_price not in", values, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceBetween(String value1, String value2) {
+            addCriterion("predict_price between", value1, value2, "predictPrice");
+            return (Criteria) this;
+        }
+
+        public Criteria andPredictPriceNotBetween(String value1, String value2) {
+            addCriterion("predict_price not between", value1, value2, "predictPrice");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

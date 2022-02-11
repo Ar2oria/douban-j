@@ -23,6 +23,8 @@ public class Douban {
 
     private String content;
 
+    private String predictPrice;
+
     public Long getId() {
         return id;
     }
@@ -95,6 +97,14 @@ public class Douban {
         this.content = content == null ? null : content.trim();
     }
 
+    public String getPredictPrice() {
+        return predictPrice;
+    }
+
+    public void setPredictPrice(String predictPrice) {
+        this.predictPrice = predictPrice == null ? null : predictPrice.trim();
+    }
+
     public static Douban.Builder builder() {
         return new Douban.Builder();
     }
@@ -151,6 +161,11 @@ public class Douban {
             return this;
         }
 
+        public Builder predictPrice(String predictPrice) {
+            obj.setPredictPrice(predictPrice);
+            return this;
+        }
+
         public Douban build() {
             return this.obj;
         }
@@ -165,7 +180,8 @@ public class Douban {
         pubTime("pub_time", "pubTime", "TIMESTAMP", false),
         createAt("create_at", "createAt", "TIMESTAMP", false),
         webId("web_id", "webId", "BIGINT", false),
-        content("content", "content", "VARCHAR", false);
+        content("content", "content", "VARCHAR", false),
+        predictPrice("predict_price", "predictPrice", "VARCHAR", false);
 
         private static final String BEGINNING_DELIMITER = "\"";
 

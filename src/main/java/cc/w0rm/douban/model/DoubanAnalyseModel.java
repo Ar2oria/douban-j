@@ -17,4 +17,5 @@ public class DoubanAnalyseModel {
     private Map<String, Object> contentMap;
     private Result result;
     private Map<String, String> tagMap;
+    private String price;
 }
