@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
  */
 public class DoubanEngine {
 
-    public static void run(String place, List<String> tagList, int day, String cookie) {
+    public static void run(String place, List<String> tagList, boolean tagSelect, int day, String cookie) {
         DBService service = new DBService();
         Pipe<DoubanAnalyseModel> pipeWebResource = Downloader.search(place, cookie, day, service.getFilter());
         Pipe<DoubanAnalyseModel> pipeText = TextProcessor.process(pipeWebResource);
         service.save(pipeText);
-        search(service, pipeText, place, tagList, day);
+        search(service, pipeText, place, tagList, tagSelect, day);
     }
 
     private static List<String> getSystemTagList() {
@@ -42,7 +42,7 @@ public class DoubanEngine {
         return tagList;
     }
 
-    private static void search(DBService service, Pipe<DoubanAnalyseModel> pipe, String place, List<String> tagList, int day) {
+    private static void search(DBService service, Pipe<DoubanAnalyseModel> pipe, String place, List<String> tagList, boolean tagSelect, int day) {
         System.out.println("===================================================");
         long now = Instant.now().toEpochMilli();
         Set<Long> filterSet = new HashSet<>();
@@ -99,7 +99,8 @@ public class DoubanEngine {
                                         .collect(Collectors.toSet());
 
                                 tNameSet.retainAll(useTagSet);
-                                return !tNameSet.isEmpty();
+                                return tagSelect ? tNameSet.size() == useTagSet.size()
+                                        : !tNameSet.isEmpty();
                             }).collect(Collectors.toList());
                     if (CollUtil.isEmpty(doubanList)) {
                         continue;
