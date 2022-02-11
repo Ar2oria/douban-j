@@ -107,7 +107,7 @@ public class TextProcessor {
     }
 
 
-    private static final Pattern PATTERN_PRICE = Pattern.compile("[1-9][0-9]{2}0");
+    private static final Pattern PATTERN_PRICE = Pattern.compile("[1-9][0-9]{2}0[0]?");
     private static final String PRICE_SPLIT = ".";
 
     private static String predictPriceFromName(String name, String prePrice) {
@@ -125,9 +125,7 @@ public class TextProcessor {
                 return price + PRICE_SPLIT + price;
             }
 
-            String[] split = new String[2];
-            split[0] = prePrice.substring(0, 4);
-            split[1] = prePrice.substring(5);
+            String[] split = prePrice.split("[.]");
 
             int min = Integer.parseInt(split[0]);
             int max = Integer.parseInt(split[1]);
