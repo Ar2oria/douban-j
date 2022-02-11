@@ -35,6 +35,7 @@ public class TextProcessor {
             Nature.NS.getDesc(), Nature.NR.getDesc());
 
     private static final int MIN_M_NATURE_LENGTH = 3;
+    private static final int MAX_M_NATURE_LENGTH = 8;
 
     static class TextProducerAction implements ProducerAction {
 
@@ -84,7 +85,7 @@ public class TextProcessor {
                     if (DEFAULT_NAS.contains(natureStr) && t.getName().length() < MIN_M_NATURE_LENGTH) {
                         continue;
                     }
-                    if (Nature.M.getDesc().equals(natureStr)) {
+                    if (Nature.M.getDesc().equals(natureStr) && t.getName().length() < MAX_M_NATURE_LENGTH) {
                         predictPrice = predictPriceFromName(t.getName(), predictPrice);
                     }
 
