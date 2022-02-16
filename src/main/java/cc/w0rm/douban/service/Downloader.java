@@ -23,10 +23,8 @@ import java.util.stream.Collectors;
  */
 public class Downloader {
 
-    private static final int MAX_THREAD_NUM = 1;
+    private static final int MAX_THREAD_NUM = 3;
     private static final int INTERVAL = 5000;
-    private static final int MAX_TIME_OUT = 5500;
-
 
     static class DoubanSearchClient {
 
@@ -76,6 +74,13 @@ public class Downloader {
         String getDoubanHtml(String url) {
             Response response = null;
             try {
+                if (!url.contains("?")) {
+                    url += "?";
+                }
+                if (!url.contains("_dtcc")) {
+                    url += "&_dtcc=1";
+                }
+
                 Request req = new Request.Builder()
                         .url(url)
                         .addHeader("Cookie", cooike)
@@ -181,9 +186,9 @@ public class Downloader {
 
                     PageInfoDTO pageInfo = responseDTO.getPageInfo();
                     maxTotal = pageInfo.getTotal();
-                    if (total == -1L){
+                    if (total == -1L) {
                         total = dataList.size();
-                    }else {
+                    } else {
                         total += dataList.size();
                     }
 
@@ -288,7 +293,7 @@ public class Downloader {
         CompletableFuture<Void> oneFuture = CompletableFuture.allOf(completableFutures);
 
         try {
-            oneFuture.get((long) MAX_TIME_OUT * dataList.size(), TimeUnit.MILLISECONDS);
+            oneFuture.get((long) interval.get() * dataList.size(), TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }
