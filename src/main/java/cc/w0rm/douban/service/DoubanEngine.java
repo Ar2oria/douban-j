@@ -39,6 +39,10 @@ public class DoubanEngine {
         tagList.add("没有服务费");
 
         tagList.add("房东直租");
+        tagList.add("业主直租");
+        tagList.add("户主直租");
+        tagList.add("个人直租");
+        tagList.add("直租");
         return tagList;
     }
 
