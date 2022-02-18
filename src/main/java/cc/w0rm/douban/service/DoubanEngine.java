@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
  */
 public class DoubanEngine {
 
-    public static void run(String place, List<String> tagList, boolean tagSelect, int day, String cookie) {
+    public static void run(String place, List<String> tagList, boolean tagSelect, boolean systemTag, int day, String cookie) {
         DBService service = new DBService();
         Pipe<DoubanAnalyseModel> pipeWebResource = Downloader.search(place, cookie, day, service.getFilter());
         Pipe<DoubanAnalyseModel> pipeText = TextProcessor.process(pipeWebResource);
         service.save(pipeText);
-        search(service, pipeText, place, tagList, tagSelect, day);
+        search(service, pipeText, place, tagList, tagSelect, systemTag, day);
     }
 
     private static List<String> getSystemTagList() {
@@ -42,7 +42,7 @@ public class DoubanEngine {
         return tagList;
     }
 
-    private static void search(DBService service, Pipe<DoubanAnalyseModel> pipe, String place, List<String> tagList, boolean tagSelect, int day) {
+    private static void search(DBService service, Pipe<DoubanAnalyseModel> pipe, String place, List<String> tagList, boolean tagSelect, boolean systemTag, int day) {
         System.out.println("===================================================");
         long now = Instant.now().toEpochMilli();
         Set<Long> filterSet = new HashSet<>();
@@ -69,21 +69,23 @@ public class DoubanEngine {
 
                 filterSet.addAll(doubanIdList);
 
-                Set<String> systemTagSet = new HashSet<>(getSystemTagList());
-                if (!CollUtil.isEmpty(systemTagSet)) {
-                    doubanList = doubanList.stream()
-                            .filter(douban -> {
-                                List<Tag> tags = doubanTagMap.get(douban.getId());
-                                if (CollUtil.isEmpty(tags)) {
-                                    return false;
-                                }
-                                Set<String> tNameSet = tags.stream()
-                                        .map(Tag::getTagText)
-                                        .filter(systemTagSet::contains)
-                                        .collect(Collectors.toSet());
+                if (systemTag) {
+                    Set<String> systemTagSet = new HashSet<>(getSystemTagList());
+                    if (!CollUtil.isEmpty(systemTagSet)) {
+                        doubanList = doubanList.stream()
+                                .filter(douban -> {
+                                    List<Tag> tags = doubanTagMap.get(douban.getId());
+                                    if (CollUtil.isEmpty(tags)) {
+                                        return false;
+                                    }
+                                    Set<String> tNameSet = tags.stream()
+                                            .map(Tag::getTagText)
+                                            .filter(systemTagSet::contains)
+                                            .collect(Collectors.toSet());
 
-                                return !tNameSet.isEmpty();
-                            }).collect(Collectors.toList());
+                                    return !tNameSet.isEmpty();
+                                }).collect(Collectors.toList());
+                    }
                 }
 
                 Set<String> useTagSet = new HashSet<>(tagList);
